@@ -1,0 +1,516 @@
+{
+  "name": "27/12/2025 Canlı Yayın Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "9986df2d-c0cb-4eeb-94b0-3eab82dd0241",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "e71e44c9-9cf3-42e1-8342-d054ab440745",
+      "name": "Webhook",
+      "webhookId": "9986df2d-c0cb-4eeb-94b0-3eab82dd0241"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0bac80d8-6947-488d-920c-cf87cd77e903",
+              "name": "contact_id",
+              "value": "={{ $json.body.contact_id }}",
+              "type": "number"
+            },
+            {
+              "id": "9e7f3d5f-4103-4ada-8daa-08468c4fa622",
+              "name": "metin",
+              "value": "={{ $json.body.metin }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "d21ddb00-1e75-435f-826a-55f43404c428",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {
+          "temperature": 0.4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        208,
+        224
+      ],
+      "id": "60c35031-1758-4f0d-964e-902099913122",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "cOsQyucqYBI8RZk7",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.contact_id }}",
+        "contextWindowLength": 20
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        656,
+        240
+      ],
+      "id": "ee84ac50-a36a-4279-b1fb-bd141637b90f",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1cx8QV47bp75fFlC9HhXoHCDc8wHxPsgTIMAdT6AT5Uo",
+          "mode": "list",
+          "cachedResultName": "Test Test",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1cx8QV47bp75fFlC9HhXoHCDc8wHxPsgTIMAdT6AT5Uo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sayfa1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1cx8QV47bp75fFlC9HhXoHCDc8wHxPsgTIMAdT6AT5Uo/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        480,
+        224
+      ],
+      "id": "bede1f1d-012a-490c-b2e1-90f2999b7762",
+      "name": "Bilgi Bankası",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "MgverJfCjTZolXBu",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.metin }}",
+        "options": {
+          "systemMessage": ""
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "273d3115-19ff-443e-9d6a-e75947a7ba4e",
+      "name": "Soru Cevaplayan Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1152,
+        0
+      ],
+      "id": "c398ee5b-e09e-4e3e-857c-26c0ddc278bd",
+      "name": "CRM Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.3,
+      "position": [
+        1312,
+        240
+      ],
+      "id": "1c5ffee9-b1e6-4279-b2ef-e16bbb800ca7",
+      "name": "Eğitim CRM"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.3,
+      "position": [
+        1456,
+        240
+      ],
+      "id": "b2b67f8a-edc0-4c00-b65c-72b029ecec7f",
+      "name": "Almak İsteyen CRM"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.3,
+      "position": [
+        1600,
+        240
+      ],
+      "id": "e45da25b-14b8-487b-83fe-35075ecc4f60",
+      "name": "Satmak İsteyen CRM"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.3,
+      "position": [
+        1168,
+        240
+      ],
+      "id": "0a0a1b4c-a039-49b9-a74e-1e3761eb975e",
+      "name": "Emlakçı CRM"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {
+          "temperature": 0.1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        1024,
+        240
+      ],
+      "id": "400aeaf5-2b97-49f0-a721-3edd1684c0cf",
+      "name": "Groq Chat Model1",
+      "credentials": {
+        "groqApi": {
+          "id": "cOsQyucqYBI8RZk7",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.manychat.com/fb/subscriber/setCustomField",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer API_BURAYA"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "subscriber_id",
+              "value": "={{ $('Edit Fields').item.json.contact_id }}"
+            },
+            {
+              "name": "field_id",
+              "value": "14069352"
+            },
+            {
+              "name": "field_value",
+              "value": "={{ $json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        752,
+        0
+      ],
+      "id": "27a375bc-54cf-4e6f-b837-fbc32c980f5d",
+      "name": "Link Yok - Custom Field1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.manychat.com/fb/sending/sendFlow",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer API_BURAYA"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "subscriber_id",
+              "value": "={{ $('Edit Fields').item.json.contact_id }}"
+            },
+            {
+              "name": "flow_ns",
+              "value": "content20251227113915_399776"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        960,
+        0
+      ],
+      "id": "1aea565f-6b9c-44d6-b41c-69445e8bf32d",
+      "name": "Link Yok - Flow1"
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "srnfcwia.rcsrv.net",
+            "user-agent": "ManyChat",
+            "content-length": "51",
+            "accept-encoding": "gzip, br",
+            "cdn-loop": "cloudflare; loops=1",
+            "cf-connecting-ip": "18.185.131.75",
+            "cf-ipcountry": "DE",
+            "cf-ray": "9b484b35ba92904e-FRA",
+            "cf-visitor": "{\"scheme\":\"https\"}",
+            "content-type": "application/json",
+            "x-forwarded-for": "18.185.131.75, 172.70.247.104",
+            "x-forwarded-host": "srnfcwia.rcsrv.net",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "e55373ffb478",
+            "x-real-ip": "172.70.247.104"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "contact_id": 593021372,
+            "metin": "merhaba"
+          },
+          "webhookUrl": "https://srnfcwia.rcsrv.net/webhook-test/9986df2d-c0cb-4eeb-94b0-3eab82dd0241",
+          "executionMode": "test"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Soru Cevaplayan Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Soru Cevaplayan Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Soru Cevaplayan Agent",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "CRM Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bilgi Bankası": {
+      "ai_tool": [
+        [
+          {
+            "node": "Soru Cevaplayan Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Soru Cevaplayan Agent": {
+      "main": [
+        [
+          {
+            "node": "Link Yok - Custom Field1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Eğitim CRM": {
+      "ai_tool": [
+        [
+          {
+            "node": "CRM Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Almak İsteyen CRM": {
+      "ai_tool": [
+        [
+          {
+            "node": "CRM Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Satmak İsteyen CRM": {
+      "ai_tool": [
+        [
+          {
+            "node": "CRM Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Emlakçı CRM": {
+      "ai_tool": [
+        [
+          {
+            "node": "CRM Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "CRM Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Link Yok - Custom Field1": {
+      "main": [
+        [
+          {
+            "node": "Link Yok - Flow1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Link Yok - Flow1": {
+      "main": [
+        [
+          {
+            "node": "CRM Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "c0b28cde-9f67-40db-8af6-d9b33dcbb96a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "26864db373f0c5e66d53d970bf3488b1dfb1ddc0d9f0bf0196c5111c9404a806"
+  },
+  "id": "fEVPyrcmLA7a4nXk",
+  "tags": [
+    {
+      "updatedAt": "2025-07-19T12:43:29.251Z",
+      "createdAt": "2025-07-19T12:43:29.251Z",
+      "id": "j954BkwBUiqg3dz2",
+      "name": "Version 2"
+    }
+  ]
+}

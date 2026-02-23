@@ -11,6 +11,8 @@ Funksiyalar:
 import gspread
 import os
 import socket
+import json
+import tempfile
 from datetime import datetime
 from google.oauth2.service_account import Credentials
 from config import GOOGLE_CREDENTIALS_PATH, GOOGLE_SHEET_ID, KNOWLEDGE_SHEET_NAME, LEADS_SHEET_NAME, SHEETS_CLIENT_TIMEOUT
@@ -20,11 +22,41 @@ SCOPES = [
     "https://www.googleapis.com/auth/drive",
 ]
 
-_creds_path = os.path.join(os.path.dirname(__file__), GOOGLE_CREDENTIALS_PATH)
+_creds_path = None
+_temp_creds_file = None
+
+def _init_creds_path():
+    """Initialize credentials path from file or environment variable."""
+    global _creds_path, _temp_creds_file
+    
+    # Try environment variable first (for Railway)
+    if os.getenv('GOOGLE_CREDENTIALS_JSON'):
+        try:
+            creds_json = json.loads(os.getenv('GOOGLE_CREDENTIALS_JSON'))
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+                json.dump(creds_json, f)
+                _temp_creds_file = f.name
+                _creds_path = _temp_creds_file
+                print(f"[Sheets] Credentials loaded from GOOGLE_CREDENTIALS_JSON env var")
+                return
+        except Exception as e:
+            print(f"[Sheets] Error parsing GOOGLE_CREDENTIALS_JSON: {e}")
+    
+    # Fall back to file path
+    _creds_path = os.path.join(os.path.dirname(__file__), GOOGLE_CREDENTIALS_PATH)
+    if os.path.exists(_creds_path):
+        print(f"[Sheets] Credentials loaded from file: {_creds_path}")
+    else:
+        print(f"[Sheets] Warning: Credentials file not found at {_creds_path}")
 
 
 def _get_client() -> gspread.Client:
     """Initialize gspread client with timeout settings."""
+    global _creds_path
+    
+    if _creds_path is None:
+        _init_creds_path()
+    
     socket.setdefaulttimeout(SHEETS_CLIENT_TIMEOUT)
     creds = Credentials.from_service_account_file(_creds_path, scopes=SCOPES)
     return gspread.authorize(creds)

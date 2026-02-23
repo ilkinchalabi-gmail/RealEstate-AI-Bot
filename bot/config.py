@@ -1,4 +1,5 @@
 import os
+import sys
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -9,6 +10,14 @@ TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 # ── Groq / AI ─────────────────────────────────────────────
 GROQ_API_KEY       = os.getenv("GROQ_API_KEY")
 GROQ_MODEL         = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+
+# ── Başlanğıc yoxlama ────────────────────────────────────
+_required = {"TELEGRAM_BOT_TOKEN": TELEGRAM_BOT_TOKEN, "GROQ_API_KEY": GROQ_API_KEY}
+_missing = [k for k, v in _required.items() if not v]
+if _missing:
+    print(f"❌ XƏTA: Bu env var-lar təyin edilməyib: {', '.join(_missing)}")
+    print("   Railway → Variables bölməsindən əlavə edin.")
+    sys.exit(1)
 
 # ── Google Sheets ─────────────────────────────────────────
 GOOGLE_SHEET_ID        = os.getenv("GOOGLE_SHEET_ID")

@@ -12,6 +12,8 @@ Komandalar:
 import asyncio
 import logging
 import os
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
 from datetime import datetime
 
 from telegram import Update, BotCommand
@@ -258,10 +260,34 @@ async def shutdown(application: Application):
     logger.info("🛑 Bot bağlandı.")
 
 
+# ── Railway Health Check Server ───────────────────────────────
+
+class _HealthHandler(BaseHTTPRequestHandler):
+    """Railway-in PORT health check-inə cavab verən mini HTTP server."""
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header("Content-Type", "text/plain")
+        self.end_headers()
+        self.wfile.write(b"OK - RealEstate AI Bot is running")
+    def log_message(self, format, *args):
+        pass  # HTTP logları gizlə
+
+def _start_health_server():
+    """Arxa planda PORT dinləyən health check server başlat."""
+    port = int(os.environ.get("PORT", 8080))
+    server = HTTPServer(("0.0.0.0", port), _HealthHandler)
+    logger.info(f"✅ Health check server PORT {port}-da başladı.")
+    server.serve_forever()
+
+
 # ── Main ──────────────────────────────────────────────────────
 
 def main():
     logger.info("🚀 Real Estate AI Bot başlayır...")
+
+    # Railway üçün health check server-i arxa planda başlat
+    health_thread = threading.Thread(target=_start_health_server, daemon=True)
+    health_thread.start()
 
     app = (
         Application.builder()

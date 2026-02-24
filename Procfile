@@ -1,1 +1,1 @@
-web: python -m bot.main
+web: cd bot && python main.py

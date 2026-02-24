@@ -1,8 +1,12 @@
 import os
 import sys
+from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()
+# .env faylını həm bot/ həm də kök qovluqdan axtarır
+_env_path = Path(__file__).parent / ".env"
+load_dotenv(_env_path)
+load_dotenv()  # fallback: kök qovluq
 
 # ── Telegram ──────────────────────────────────────────────
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
